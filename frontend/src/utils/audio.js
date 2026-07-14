@@ -105,5 +105,52 @@ export const playSFX = (type) => {
         gainNode.connect(audioCtx.destination);
         osc.start(now);
         osc.stop(now + 1.6);
+    } else if (type === 'register_on') {
+        const gain = audioCtx.createGain();
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.8);
+        gain.connect(audioCtx.destination);
+        for (let i = 0; i < 4; i++) {
+            const osc = audioCtx.createOscillator();
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(200 + i * 150, now + i * 0.08);
+            osc.frequency.exponentialRampToValueAtTime(80, now + i * 0.08 + 0.1);
+            osc.connect(gain);
+            osc.start(now + i * 0.08);
+            osc.stop(now + i * 0.08 + 0.12);
+        }
+    } else if (type === 'register_click') {
+        const osc = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(1200, now);
+        osc.frequency.exponentialRampToValueAtTime(400, now + 0.15);
+        gainNode.gain.setValueAtTime(0.4, now);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+        osc.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        osc.start(now);
+        osc.stop(now + 0.15);
+    } else if (type === 'clean') {
+        const bufferSize = audioCtx.sampleRate * 0.5;
+        const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+            data[i] = (Math.random() * 2 - 1) * (1 - i / bufferSize);
+        }
+        const source = audioCtx.createBufferSource();
+        const gainNode = audioCtx.createGain();
+        const filter = audioCtx.createBiquadFilter();
+        source.buffer = buffer;
+        filter.type = 'bandpass';
+        filter.frequency.setValueAtTime(3000, now);
+        filter.Q.setValueAtTime(0.5, now);
+        gainNode.gain.setValueAtTime(0.3, now);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+        source.connect(filter);
+        filter.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        source.start(now);
+        source.stop(now + 0.5);
     }
 };

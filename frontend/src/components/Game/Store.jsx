@@ -5,10 +5,13 @@ import { RigidBody, CuboidCollider } from '@react-three/rapier';
 import * as THREE from 'three';
 import { GameContext } from '../../pages/Game';
 
-const glassMaterial = new THREE.MeshStandardMaterial({
-    color: '#222222',
-    metalness: 0.9,
-    roughness: 0.1,
+const glassMaterial = new THREE.MeshPhysicalMaterial({
+    color: '#111133',
+    metalness: 0.95,
+    roughness: 0.05,
+    envMapIntensity: 2,
+    clearcoat: 0.3,
+    clearcoatRoughness: 0.1,
 });
 
 const AnimatedDoor = ({ doorOpen }) => {
@@ -25,12 +28,12 @@ const AnimatedDoor = ({ doorOpen }) => {
         <RigidBody ref={doorRef} type="kinematicPosition" position={[0, 2, 15]}>
             <mesh receiveShadow>
                 <boxGeometry args={[3.8, 4, 0.15]} />
-                <meshStandardMaterial color="#222222" metalness={0.9} roughness={0.1} />
+                <meshPhysicalMaterial color="#1a1a2e" metalness={0.95} roughness={0.05} envMapIntensity={2} clearcoat={0.2} />
             </mesh>
             <CuboidCollider args={[1.9, 2, 0.1]} />
             <mesh position={[1.5, 0, 0.1]}>
                 <cylinderGeometry args={[0.03, 0.03, 0.6]} />
-                <meshStandardMaterial color="#888" metalness={0.9} roughness={0.1} />
+                <meshPhysicalMaterial color="#aaa" metalness={0.9} roughness={0.1} />
             </mesh>
         </RigidBody>
     );
@@ -52,13 +55,13 @@ const Store = () => {
     return (
         <group>
             <RigidBody type="fixed" colliders="cuboid">
-                {/* FLOOR */}
+                {/* FLOOR - Reflective polished tile */}
                 <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.05, -5]} receiveShadow>
                     <planeGeometry args={[30, 40]} />
                     <MeshReflectorMaterial
-                        blur={[200, 50]} resolution={512} mixBlur={1} mixStrength={1.5}
-                        roughness={0.2} depthScale={1} minDepthThreshold={0.4} maxDepthThreshold={1.4}
-                        color="#e0e0e0" metalness={0.2}
+                        blur={[300, 100]} resolution={1024} mixBlur={0.5} mixStrength={3}
+                        roughness={0.15} depthScale={0.5} minDepthThreshold={0.4} maxDepthThreshold={1.4}
+                        color="#c8c8c8" metalness={0.3}
                     />
                 </mesh>
             </RigidBody>
@@ -67,16 +70,34 @@ const Store = () => {
                 {/* ROOF */}
                 <mesh position={[0, 6, -5]} receiveShadow castShadow>
                     <boxGeometry args={[31, 0.5, 41]} />
-                    <meshStandardMaterial color={activeAnomalies.includes('red_lights') ? "#330000" : "#2a2a2a"} roughness={0.9} />
+                    <meshPhysicalMaterial color={activeAnomalies.includes('red_lights') ? "#440000" : "#1a1a1a"} roughness={0.8} metalness={0.1} />
                 </mesh>
                 {/* Light Panels on ceiling */}
                 <group position={[0, 5.75, 0]}>
-                    <mesh position={[-6, 0, 5]}><boxGeometry args={[2, 0.1, 1]} /><meshStandardMaterial emissive={lightsOn ? "#fff" : "#222"} emissiveIntensity={lightsOn ? 2 : 0} /></mesh>
-                    <mesh position={[6, 0, 5]}><boxGeometry args={[2, 0.1, 1]} /><meshStandardMaterial emissive={lightsOn ? "#fff" : "#222"} emissiveIntensity={lightsOn ? 2 : 0} /></mesh>
-                    <mesh position={[-6, 0, -5]}><boxGeometry args={[2, 0.1, 1]} /><meshStandardMaterial emissive={lightsOn ? "#fff" : "#222"} emissiveIntensity={lightsOn ? 2 : 0} /></mesh>
-                    <mesh position={[6, 0, -5]}><boxGeometry args={[2, 0.1, 1]} /><meshStandardMaterial emissive={lightsOn ? "#fff" : "#222"} emissiveIntensity={lightsOn ? 2 : 0} /></mesh>
-                    <mesh position={[-6, 0, -15]}><boxGeometry args={[2, 0.1, 1]} /><meshStandardMaterial emissive={lightsOn ? "#fff" : "#222"} emissiveIntensity={lightsOn ? 2 : 0} /></mesh>
-                    <mesh position={[6, 0, -15]}><boxGeometry args={[2, 0.1, 1]} /><meshStandardMaterial emissive={lightsOn ? "#fff" : "#222"} emissiveIntensity={lightsOn ? 2 : 0} /></mesh>
+                    <mesh position={[-6, 0, 5]}>
+                        <boxGeometry args={[2, 0.1, 1]} />
+                        <meshPhysicalMaterial color="#ffffff" emissive={lightsOn ? "#fff8e0" : "#222"} emissiveIntensity={lightsOn ? 3 : 0} roughness={0.1} metalness={0.2} />
+                    </mesh>
+                    <mesh position={[6, 0, 5]}>
+                        <boxGeometry args={[2, 0.1, 1]} />
+                        <meshPhysicalMaterial color="#ffffff" emissive={lightsOn ? "#fff8e0" : "#222"} emissiveIntensity={lightsOn ? 3 : 0} roughness={0.1} metalness={0.2} />
+                    </mesh>
+                    <mesh position={[-6, 0, -5]}>
+                        <boxGeometry args={[2, 0.1, 1]} />
+                        <meshPhysicalMaterial color="#ffffff" emissive={lightsOn ? "#fff8e0" : "#222"} emissiveIntensity={lightsOn ? 3 : 0} roughness={0.1} metalness={0.2} />
+                    </mesh>
+                    <mesh position={[6, 0, -5]}>
+                        <boxGeometry args={[2, 0.1, 1]} />
+                        <meshPhysicalMaterial color="#ffffff" emissive={lightsOn ? "#fff8e0" : "#222"} emissiveIntensity={lightsOn ? 3 : 0} roughness={0.1} metalness={0.2} />
+                    </mesh>
+                    <mesh position={[-6, 0, -15]}>
+                        <boxGeometry args={[2, 0.1, 1]} />
+                        <meshPhysicalMaterial color="#ffffff" emissive={lightsOn ? "#fff8e0" : "#222"} emissiveIntensity={lightsOn ? 3 : 0} roughness={0.1} metalness={0.2} />
+                    </mesh>
+                    <mesh position={[6, 0, -15]}>
+                        <boxGeometry args={[2, 0.1, 1]} />
+                        <meshPhysicalMaterial color="#ffffff" emissive={lightsOn ? "#fff8e0" : "#222"} emissiveIntensity={lightsOn ? 3 : 0} roughness={0.1} metalness={0.2} />
+                    </mesh>
                 </group>
             </RigidBody>
 
@@ -101,31 +122,31 @@ const Store = () => {
                 </mesh>
             </RigidBody>
             <RigidBody type="fixed" colliders="cuboid">
-                <mesh position={[0, 3, -25]} receiveShadow><boxGeometry args={[30, 6, 0.5]} /><meshStandardMaterial color="#c0c0c0" /></mesh>
-                <mesh position={[0, 0.2, -24.7]}><boxGeometry args={[30, 0.4, 0.1]} /><meshStandardMaterial color="#333" /></mesh>
+                <mesh position={[0, 3, -25]} receiveShadow><boxGeometry args={[30, 6, 0.5]} /><meshPhysicalMaterial color="#b8b8b8" roughness={0.6} metalness={0.05} /></mesh>
+                <mesh position={[0, 0.2, -24.7]}><boxGeometry args={[30, 0.4, 0.1]} /><meshPhysicalMaterial color="#333" roughness={0.8} /></mesh>
             </RigidBody>
             <RigidBody type="fixed" colliders="cuboid">
-                <mesh position={[-15, 3, -5]} receiveShadow><boxGeometry args={[0.5, 6, 40]} /><meshStandardMaterial color="#dcdcdc" /></mesh>
-                <mesh position={[-14.7, 0.2, -5]}><boxGeometry args={[0.1, 0.4, 40]} /><meshStandardMaterial color="#333" /></mesh>
+                <mesh position={[-15, 3, -5]} receiveShadow><boxGeometry args={[0.5, 6, 40]} /><meshPhysicalMaterial color="#d0d0d0" roughness={0.4} metalness={0.05} /></mesh>
+                <mesh position={[-14.7, 0.2, -5]}><boxGeometry args={[0.1, 0.4, 40]} /><meshPhysicalMaterial color="#333" roughness={0.8} /></mesh>
             </RigidBody>
             <RigidBody type="fixed" colliders="cuboid">
-                <mesh position={[15, 3, -5]} receiveShadow><boxGeometry args={[0.5, 6, 40]} /><meshStandardMaterial color="#dcdcdc" /></mesh>
-                <mesh position={[14.7, 0.2, -5]}><boxGeometry args={[0.1, 0.4, 40]} /><meshStandardMaterial color="#333" /></mesh>
+                <mesh position={[15, 3, -5]} receiveShadow><boxGeometry args={[0.5, 6, 40]} /><meshPhysicalMaterial color="#d0d0d0" roughness={0.4} metalness={0.05} /></mesh>
+                <mesh position={[14.7, 0.2, -5]}><boxGeometry args={[0.1, 0.4, 40]} /><meshPhysicalMaterial color="#333" roughness={0.8} /></mesh>
             </RigidBody>
 
             {/* CEILING BEAMS */}
             <group position={[0, 5.8, -5]}>
-                <mesh position={[0, 0, 0]}><boxGeometry args={[30, 0.2, 0.4]} /><meshStandardMaterial color="#111" /></mesh>
-                <mesh position={[0, 0, 10]}><boxGeometry args={[30, 0.2, 0.4]} /><meshStandardMaterial color="#111" /></mesh>
-                <mesh position={[0, 0, -10]}><boxGeometry args={[30, 0.2, 0.4]} /><meshStandardMaterial color="#111" /></mesh>
+                <mesh position={[0, 0, 0]}><boxGeometry args={[30, 0.2, 0.4]} /><meshPhysicalMaterial color="#111" roughness={0.9} metalness={0.3} /></mesh>
+                <mesh position={[0, 0, 10]}><boxGeometry args={[30, 0.2, 0.4]} /><meshPhysicalMaterial color="#111" roughness={0.9} metalness={0.3} /></mesh>
+                <mesh position={[0, 0, -10]}><boxGeometry args={[30, 0.2, 0.4]} /><meshPhysicalMaterial color="#111" roughness={0.9} metalness={0.3} /></mesh>
             </group>
 
             {/* DIVIDER WALLS */}
             <RigidBody type="fixed" colliders="cuboid">
-                <mesh position={[0, 3, -10.25]} receiveShadow><boxGeometry args={[10, 6, 0.5]} /><meshStandardMaterial color="#b0b0b0" /></mesh>
-                <mesh position={[-11.5, 3, -10.25]} receiveShadow><boxGeometry args={[7, 6, 0.5]} /><meshStandardMaterial color="#b0b0b0" /></mesh>
-                <mesh position={[11.5, 3, -10.25]} receiveShadow><boxGeometry args={[7, 6, 0.5]} /><meshStandardMaterial color="#b0b0b0" /></mesh>
-                <mesh position={[0, 3, -17.5]}><boxGeometry args={[0.5, 6, 15]} /><meshStandardMaterial color="#a0a0a0" /></mesh>
+                <mesh position={[0, 3, -10.25]} receiveShadow><boxGeometry args={[10, 6, 0.5]} /><meshPhysicalMaterial color="#a8a8a8" roughness={0.5} metalness={0.05} /></mesh>
+                <mesh position={[-11.5, 3, -10.25]} receiveShadow><boxGeometry args={[7, 6, 0.5]} /><meshPhysicalMaterial color="#a8a8a8" roughness={0.5} metalness={0.05} /></mesh>
+                <mesh position={[11.5, 3, -10.25]} receiveShadow><boxGeometry args={[7, 6, 0.5]} /><meshPhysicalMaterial color="#a8a8a8" roughness={0.5} metalness={0.05} /></mesh>
+                <mesh position={[0, 3, -17.5]}><boxGeometry args={[0.5, 6, 15]} /><meshPhysicalMaterial color="#989898" roughness={0.5} metalness={0.05} /></mesh>
             </RigidBody>
 
             <AnimatedDoor doorOpen={doorOpen} />
@@ -135,24 +156,37 @@ const Store = () => {
                 <group position={[0, 3 + Math.sin(Date.now() * 0.002), 0]}>
                     <mesh castShadow>
                         <capsuleGeometry args={[0.4, 1, 4]} />
-                        <meshStandardMaterial color="#ffffff" metalness={0.5} roughness={0.1} />
+                        <meshPhysicalMaterial color="#eeeee" metalness={0.8} roughness={0.1} envMapIntensity={3} clearcoat={0.5} />
                     </mesh>
-                    <Text position={[0, 1.5, 0]} fontSize={0.2} color="red">MÍRAME</Text>
+                    {/* Flickering red glow */}
+                    <mesh position={[0, 2.5, 0]}>
+                        <sphereGeometry args={[0.5]} />
+                        <meshPhysicalMaterial color="#ff0000" emissive="#ff0000" emissiveIntensity={2 + Math.sin(Date.now() * 0.01) * 1.5} transparent opacity={0.3} />
+                    </mesh>
+                    <Text position={[0, 1.5, 0]} fontSize={0.25} color="#ff0000" outlineColor="#000" outlineWidth={0.02}>
+                        MÍRAME
+                        <meshPhysicalMaterial emissive="#ff0000" emissiveIntensity={8} color="#ff0000" />
+                    </Text>
                 </group>
             )}
 
             {/* Signs / Texts */}
-            <Text position={[0, 4.8, 15.3]} fontSize={1.5} color="#ff2a6d" font="https://fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfMZhrib2Bg-4.ttf" anchorX="center" anchorY="middle">
+            <Text position={[0, 4.8, 15.3]} fontSize={1.8} color="#ff2a6d" font="https://fonts.gstatic.com/s/inter/v12/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfMZhrib2Bg-4.ttf" anchorX="center" anchorY="middle">
                 Sayray
-                <meshStandardMaterial emissive="#ff2a6d" emissiveIntensity={25} color="#ff2a6d" />
+                <meshPhysicalMaterial emissive="#ff2a6d" emissiveIntensity={40} color="#ff2a6d" roughness={0.2} metalness={0.1} />
             </Text>
+            {/* Neon glow tube behind sign */}
+            <mesh position={[0, 4.8, 15.1]}>
+                <planeGeometry args={[6, 1.5]} />
+                <meshPhysicalMaterial color="#ff2a6d" emissive="#ff2a6d" emissiveIntensity={2} transparent opacity={0.15} roughness={0.5} />
+            </mesh>
 
-            <Text position={[-6.5, 4.5, -9.7]} fontSize={0.8} color="#111">BAÑO</Text>
-            <Text position={[6.5, 4.5, -9.7]} fontSize={0.8} color="#111">ALMACÉN</Text>
+            <Text position={[-6.5, 4.5, -9.7]} fontSize={0.8} color="#ccc">BAÑO</Text>
+            <Text position={[6.5, 4.5, -9.7]} fontSize={0.8} color="#ccc">ALMACÉN</Text>
 
             {/* CLOCK */}
-            <mesh position={[0, 4.5, -9.7]} castShadow><boxGeometry args={[2.5, 1, 0.1]} /><meshStandardMaterial color="#000" /></mesh>
-            <Text position={[0, 4.5, -9.6]} fontSize={0.6} color="#ff0000">{formatTime(time)}<meshStandardMaterial emissive="#ff0000" emissiveIntensity={4} color="#ff0000" /></Text>
+            <mesh position={[0, 4.5, -9.7]} castShadow><boxGeometry args={[2.5, 1, 0.1]} /><meshPhysicalMaterial color="#0a0a0a" roughness={0.8} metalness={0.3} /></mesh>
+            <Text position={[0, 4.5, -9.6]} fontSize={0.6} color="#ff0000">{formatTime(time)}<meshPhysicalMaterial emissive="#ff0000" emissiveIntensity={6} color="#ff0000" roughness={0.2} /></Text>
 
             {/* RULES POSTER */}
             <group position={[-14.7, 3, 0]} rotation={[0, Math.PI / 2, 0]}>
@@ -208,30 +242,73 @@ const Store = () => {
             <RigidBody type="fixed" colliders="cuboid"><ClothingRack position={[4, 0, 4]} /></RigidBody>
 
             <RigidBody type="fixed" colliders="cuboid">
-                {/* COUNTER */}
-                <mesh position={[0, 0.5, 12]} castShadow receiveShadow><boxGeometry args={[6, 1.0, 1.5]} /><meshStandardMaterial color="#dfdfdf" /></mesh>
-                <mesh position={[0, 1.05, 12]} castShadow receiveShadow><boxGeometry args={[6.2, 0.1, 1.6]} /><meshStandardMaterial color="#5c3a21" /></mesh>
+                {/* COUNTER - Polished wood */}
+                <mesh position={[0, 0.5, 12]} castShadow receiveShadow>
+                    <boxGeometry args={[6, 1.0, 1.5]} />
+                    <meshPhysicalMaterial color="#d4d4d4" roughness={0.3} metalness={0.2} envMapIntensity={1.5} clearcoat={0.5} clearcoatRoughness={0.3} />
+                </mesh>
+                <mesh position={[0, 1.05, 12]} castShadow receiveShadow>
+                    <boxGeometry args={[6.2, 0.1, 1.6]} />
+                    <meshPhysicalMaterial color="#4a2810" roughness={0.4} metalness={0.1} envMapIntensity={1} clearcoat={0.3} />
+                </mesh>
             </RigidBody>
 
             {/* --- ANOMALÍA: BOLSO MOVIDO --- */}
             {activeAnomalies.includes('moving_bag') && (
                 <mesh position={[0, 0.3, 8]} castShadow>
                     <boxGeometry args={[0.6, 0.5, 0.3]} />
-                    <meshStandardMaterial color="purple" />
+                    <meshPhysicalMaterial color="#8844aa" metalness={0.3} roughness={0.4} envMapIntensity={1.5} />
                 </mesh>
+            )}
+
+            {/* --- ANOMALÍA: CAJA EXTRA --- */}
+            {activeAnomalies.includes('extra_box') && (
+                <group position={[0, 0.5, 5]}>
+                    <mesh castShadow>
+                        <boxGeometry args={[1.2, 1, 1.2]} />
+                        <meshPhysicalMaterial color="#8B4513" roughness={0.7} metalness={0.1} />
+                    </mesh>
+                    <mesh position={[0, 0.6, 0.61]}>
+                        <planeGeometry args={[0.8, 0.4]} />
+                        <meshPhysicalMaterial color="#fff" />
+                    </mesh>
+                    <Text position={[0, 0.6, 0.62]} fontSize={0.15} color="#000" anchorX="center" anchorY="middle">?</Text>
+                </group>
             )}
 
             {/* Phone */}
             <group position={[1.5, 1.1, 12]} rotation={[0, -0.2, 0]}>
-                <mesh castShadow><boxGeometry args={[0.6, 0.15, 0.8]} /><meshStandardMaterial color="#1a1a1a" /></mesh>
-                <mesh position={[0, 0.15, 0]} castShadow><boxGeometry args={[0.4, 0.1, 0.7]} /><meshStandardMaterial color="#111" /></mesh>
-                <mesh position={[0, 0.2, 0]}><sphereGeometry args={[0.05]} /><meshStandardMaterial emissive={phoneRinging ? "#ff0000" : "#000"} emissiveIntensity={phoneRinging ? 5 : 0} color="#ff0000" /></mesh>
+                <mesh castShadow>
+                    <boxGeometry args={[0.6, 0.15, 0.8]} />
+                    <meshPhysicalMaterial color="#1a1a1a" roughness={0.6} metalness={0.8} />
+                </mesh>
+                <mesh position={[0, 0.15, 0]} castShadow>
+                    <boxGeometry args={[0.4, 0.1, 0.7]} />
+                    <meshPhysicalMaterial color="#111" roughness={0.8} metalness={0.3} />
+                </mesh>
+                <mesh position={[0, 0.2, 0]}>
+                    <sphereGeometry args={[0.06]} />
+                    <meshPhysicalMaterial emissive={phoneRinging ? "#ff0000" : "#111"} emissiveIntensity={phoneRinging ? 8 : 0} color={phoneRinging ? "#ff0000" : "#222"} />
+                </mesh>
             </group>
 
             {/* Register */}
             <group position={[-1, 1.25, 11.9]} rotation={[0.2, 0, 0]}>
-                <mesh castShadow><boxGeometry args={[1, 0.8, 0.8]} /><meshStandardMaterial color="#333" /></mesh>
-                <mesh position={[0, 0.3, 0.4]}><boxGeometry args={[0.8, 0.5, 0.05]} /><meshStandardMaterial emissive={registerOn ? (registerClosed ? "#0033aa" : "#00aa33") : "#000"} emissiveIntensity={2} color="#111" /></mesh>
+                <mesh castShadow>
+                    <boxGeometry args={[1, 0.8, 0.8]} />
+                    <meshPhysicalMaterial color="#2a2a2a" roughness={0.3} metalness={0.7} envMapIntensity={2} />
+                </mesh>
+                <mesh position={[0, 0.3, 0.4]}>
+                    <boxGeometry args={[0.8, 0.5, 0.05]} />
+                    <meshPhysicalMaterial emissive={registerOn ? (registerClosed ? "#0044ff" : "#00ff44") : "#000"} emissiveIntensity={registerOn ? 3 : 0} color="#111" roughness={0.3} metalness={0.5} />
+                </mesh>
+                {/* Screen glow */}
+                {registerOn && (
+                    <mesh position={[0, 0.35, 0.55]}>
+                        <planeGeometry args={[0.5, 0.25]} />
+                        <meshPhysicalMaterial color="#00ff44" emissive="#00ff44" emissiveIntensity={0.5} transparent opacity={0.3} />
+                    </mesh>
+                )}
             </group>
 
             {/* Warehouse */}

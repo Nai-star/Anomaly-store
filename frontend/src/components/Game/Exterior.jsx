@@ -140,19 +140,29 @@ const AnimatedBus = ({ active }) => {
         <RigidBody ref={busRef} type="kinematicPosition" position={[8, 0, 26.5]}>
             <mesh position={[0, 2, 0]} castShadow>
                 <boxGeometry args={[12, 4, 3]} />
-                <meshStandardMaterial color="#88270b" />
+                <meshPhysicalMaterial color="#88270b" roughness={0.6} metalness={0.4} envMapIntensity={1.5} clearcoat={0.3} />
             </mesh>
+            {/* Bus windows */}
             <mesh position={[0, 2.5, 1.55]}>
                 <boxGeometry args={[10, 1.5, 0.1]} />
-                <meshStandardMaterial color="#1b2226" metalness={0.8} roughness={0.2} />
+                <meshPhysicalMaterial color="#1b2226" metalness={0.9} roughness={0.1} envMapIntensity={2} />
+            </mesh>
+            {/* Headlights */}
+            <mesh position={[-3.5, 1.5, 1.55]}>
+                <planeGeometry args={[0.5, 0.3]} />
+                <meshPhysicalMaterial color="#ffeecc" emissive="#ffeecc" emissiveIntensity={2} />
+            </mesh>
+            <mesh position={[3.5, 1.5, 1.55]}>
+                <planeGeometry args={[0.5, 0.3]} />
+                <meshPhysicalMaterial color="#ffeecc" emissive="#ffeecc" emissiveIntensity={2} />
             </mesh>
             <mesh position={[-4, 0.8, 1.5]} rotation={[Math.PI / 2, 0, 0]}>
                 <cylinderGeometry args={[0.8, 0.8, 0.5, 32]} />
-                <meshStandardMaterial color="#111111" />
+                <meshPhysicalMaterial color="#111" roughness={0.9} />
             </mesh>
             <mesh position={[4, 0.8, 1.5]} rotation={[Math.PI / 2, 0, 0]}>
                 <cylinderGeometry args={[0.8, 0.8, 0.5, 32]} />
-                <meshStandardMaterial color="#111111" />
+                <meshPhysicalMaterial color="#111" roughness={0.9} />
             </mesh>
         </RigidBody>
     );
@@ -164,14 +174,14 @@ const Exterior = ({ active }) => {
             <RigidBody type="fixed">
                 <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.05, 0]} receiveShadow>
                     <planeGeometry args={[200, 200]} />
-                    <meshStandardMaterial color="#060a06" roughness={1} />
+                    <meshPhysicalMaterial color="#060a06" roughness={1} metalness={0} />
                 </mesh>
             </RigidBody>
 
             <RigidBody type="fixed">
                 <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.01, 24]} receiveShadow>
                     <planeGeometry args={[100, 8]} />
-                    <meshStandardMaterial color="#1a1b1d" roughness={0.8} />
+                    <meshPhysicalMaterial color="#1a1b1d" roughness={0.7} metalness={0.2} />
                 </mesh>
             </RigidBody>
 
@@ -185,7 +195,7 @@ const Exterior = ({ active }) => {
             <RigidBody type="fixed">
                 <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.05, 17.5]} receiveShadow>
                     <planeGeometry args={[40, 5]} />
-                    <meshStandardMaterial color="#2d2d2d" roughness={1} />
+                    <meshPhysicalMaterial color="#2d2d2d" roughness={0.8} metalness={0.1} />
                 </mesh>
             </RigidBody>
 

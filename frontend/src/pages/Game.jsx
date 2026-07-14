@@ -1,8 +1,9 @@
-import React, { createContext, useState, useEffect, Suspense } from 'react';
+import React, { createContext, useState, useEffect, Suspense, useRef } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { PointerLockControls, SoftShadows, Sky, Stars } from '@react-three/drei';
+import { PointerLockControls, SoftShadows, Sky, Stars, Environment } from '@react-three/drei';
 import { Physics } from '@react-three/rapier';
-import { EffectComposer, Bloom, Noise, Vignette, BrightnessContrast } from '@react-three/postprocessing';
+import { EffectComposer, Bloom, Noise, Vignette, BrightnessContrast, SMAA, SSAO, ToneMapping, ChromaticAberration } from '@react-three/postprocessing';
+import { useNavigate } from 'react-router-dom';
 import Store from '../components/Game/Store';
 import Player from '../components/Game/Player';
 import Exterior from '../components/Game/Exterior';
@@ -10,61 +11,85 @@ import './../css/pages/Game.css';
 
 export const GameContext = createContext();
 
+const SHIFT_END = 360; // 6 AM
+const ANOMALIES = [
+    { id: 'floating_mannequin', name: 'Maniquí Flotante', chance: 0.1 },
+    { id: 'red_lights', name: 'Luces Rojas', chance: 0.15 },
+    { id: 'moving_bag', name: 'Bolso Movido', chance: 0.2 },
+    { id: 'extra_box', name: 'Caja Extra', chance: 0.2 },
+];
+
+const formatTime = (minutes) => {
+    let h = Math.floor(minutes / 60);
+    let m = minutes % 60;
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    h = h % 12 || 12;
+    return `${h}:${m < 10 ? '0' + m : m} ${ampm}`;
+};
+
 const Game = () => {
+    const navigate = useNavigate();
     const [active, setActive] = useState(false);
+    const [gameOver, setGameOver] = useState(false);
     const [doorOpen, setDoorOpen] = useState(false);
     const [lightsOn, setLightsOn] = useState(false);
-
     const [registerOn, setRegisterOn] = useState(false);
     const [registerClosed, setRegisterClosed] = useState(true);
-
     const [phoneRinging, setPhoneRinging] = useState(false);
     const [phoneAnswered, setPhoneAnswered] = useState(false);
-
     const [bathroomClean, setBathroomClean] = useState(false);
-
-    // Anomalies state
-    const [activeAnomalies, setActiveAnomalies] = useState([]); // List of IDs
+    const [activeAnomalies, setActiveAnomalies] = useState([]);
     const [reportedAnomalies, setReportedAnomalies] = useState([]);
-
-    // Time is minutes from 12:00 AM
+    const [missedAnomalies, setMissedAnomalies] = useState(0);
     const [time, setTime] = useState(0);
-
     const [interactionMsg, setInteractionMsg] = useState('');
     const [bossMessage, setBossMessage] = useState('');
+    const [anomalyAlert, setAnomalyAlert] = useState('');
+    const anomalyAlertTimer = useRef(null);
 
-    // List of possible anomalies
-    const ANOMALIES_POOL = [
-        { id: 'floating_mannequin', name: 'Maniquí Flotante', chance: 0.1 },
-        { id: 'red_lights', name: 'Luces Rojas', chance: 0.15 },
-        { id: 'moving_bag', name: 'Bolso Movido', chance: 0.2 },
-        { id: 'extra_box', name: 'Caja Extra', chance: 0.2 },
-    ];
-
-    // Clock tick
     useEffect(() => {
         const timer = setInterval(() => {
             setTime(prev => {
                 const nextTime = prev + 1;
-                // Every 10 in-game minutes, check for an anomaly
+                if (nextTime >= SHIFT_END) {
+                    setGameOver(true);
+                    clearInterval(timer);
+                    return prev;
+                }
+                if (nextTime > 20 && nextTime % 30 === 0) {
+                    setActiveAnomalies(current => {
+                        const missed = current.length;
+                        if (missed > 0) {
+                            setMissedAnomalies(prev => prev + missed);
+                            return [];
+                        }
+                        return current;
+                    });
+                }
                 if (nextTime % 10 === 0 && nextTime > 20) {
-                    ANOMALIES_POOL.forEach(anomaly => {
-                        if (Math.random() < anomaly.chance && !activeAnomalies.includes(anomaly.id)) {
-                            setActiveAnomalies(current => [...current, anomaly.id]);
-                            console.log("¡ANOMALÍA DETECTADA INTERNAMENTE!", anomaly.id);
+                    ANOMALIES.forEach(anomaly => {
+                        if (Math.random() < anomaly.chance) {
+                            setActiveAnomalies(current => {
+                                if (!current.includes(anomaly.id)) {
+                                    setAnomalyAlert(`⚠️ ALERTA: ${anomaly.name}`);
+                                    if (anomalyAlertTimer.current) clearTimeout(anomalyAlertTimer.current);
+                                    anomalyAlertTimer.current = setTimeout(() => setAnomalyAlert(''), 4000);
+                                    return [...current, anomaly.id];
+                                }
+                                return current;
+                            });
                         }
                     });
                 }
                 return nextTime;
             });
-        }, 2000); // 1 in-game minute every 2 real seconds
+        }, 2000);
         return () => clearInterval(timer);
-    }, [activeAnomalies]);
+    }, []);
 
-    // Phone event when lights turn on
     useEffect(() => {
         if (lightsOn && !phoneAnswered && !phoneRinging) {
-            setTimeout(() => setPhoneRinging(true), 2000); // rings 2 seconds after lights
+            setTimeout(() => setPhoneRinging(true), 2000);
         }
     }, [lightsOn]);
 
@@ -82,81 +107,153 @@ const Game = () => {
         }
     };
 
+    const handleRestart = () => {
+        setGameOver(false);
+        setActive(false);
+        setDoorOpen(false);
+        setLightsOn(false);
+        setRegisterOn(false);
+        setRegisterClosed(true);
+        setPhoneRinging(false);
+        setPhoneAnswered(false);
+        setBathroomClean(false);
+        setActiveAnomalies([]);
+        setReportedAnomalies([]);
+        setMissedAnomalies(0);
+        setTime(0);
+        setInteractionMsg('');
+        setBossMessage('');
+        setAnomalyAlert('');
+    };
+
+    const score = (reportedAnomalies.length * 100) + (lightsOn ? 50 : 0) + (phoneAnswered ? 50 : 0) + (bathroomClean ? 50 : 0) + (registerOn ? 50 : 0);
+    const totalAnomalies = reportedAnomalies.length + missedAnomalies;
+    const shiftComplete = time >= SHIFT_END;
+
     return (
         <GameContext.Provider value={{
-            doorOpen, setDoorOpen,
-            lightsOn, setLightsOn,
-            registerOn, setRegisterOn,
-            registerClosed, setRegisterClosed,
-            phoneRinging, setPhoneRinging,
-            phoneAnswered, setPhoneAnswered,
-            bathroomClean, setBathroomClean,
-            time,
-            activeAnomalies,
-            reportAnomaly,
-            setInteractionMsg
+            doorOpen, setDoorOpen, lightsOn, setLightsOn,
+            registerOn, setRegisterOn, registerClosed, setRegisterClosed,
+            phoneRinging, setPhoneRinging, phoneAnswered, setPhoneAnswered,
+            bathroomClean, setBathroomClean, time, activeAnomalies,
+            reportAnomaly, setInteractionMsg, setMissedAnomalies,
         }}>
             <div className="game-container">
-                {!active && (
+                {!active && !gameOver && (
                     <div className="start-screen" onClick={() => setActive(true)}>
-                        <h1>SAYRAY: TURNO DE NOCHE</h1>
-                        <p>Haz clic para comenzar el turno...</p>
-                        <div className="controls-hint">
-                            W,A,S,D - Moverse | E - Interactuar | Mouse - Mirar
+                        <div className="start-badge">SAYRAY</div>
+                        <h1 className="start-title">TURNO DE NOCHE</h1>
+                        <p className="start-subtitle">12:00 AM - 6:00 AM</p>
+                        <div className="start-rules">
+                            <p>📋 Mantén la tienda funcionando</p>
+                            <p>👻 Reporta cualquier anomalía al jefe</p>
+                            <p>🧹 Limpia el baño cuando sea necesario</p>
+                            <p>⚠️ No ignores las señales</p>
+                        </div>
+                        <div className="start-hint">HAZ CLIC PARA COMENZAR</div>
+                        <div className="start-controls">WASD · E Interactuar · Mouse Mirar</div>
+                    </div>
+                )}
+
+                {gameOver && (
+                    <div className="gameover-screen">
+                        <div className="gameover-box">
+                            <h1 className="gameover-title">
+                                {shiftComplete ? 'TURNO COMPLETADO' : 'TURNO TERMINADO'}
+                            </h1>
+                            <div className="gameover-time">{formatTime(time)}</div>
+                            <div className="gameover-divider" />
+                            <div className="gameover-stats">
+                                <div className="stat">
+                                    <span className="stat-label">ANOMALÍAS REPORTADAS</span>
+                                    <span className="stat-value">{reportedAnomalies.length}</span>
+                                </div>
+                                <div className="stat">
+                                    <span className="stat-label">ANOMALÍAS PERDIDAS</span>
+                                    <span className="stat-value">{missedAnomalies}</span>
+                                </div>
+                                <div className="stat">
+                                    <span className="stat-label">TAREAS COMPLETADAS</span>
+                                    <span className="stat-value">{[(lightsOn ? 1 : 0), (phoneAnswered ? 1 : 0), (bathroomClean ? 1 : 0), (registerOn ? 1 : 0)].filter(Boolean).length}/4</span>
+                                </div>
+                            </div>
+                            <div className="gameover-divider" />
+                            <div className="gameover-score">
+                                <span className="score-label">PUNTAJE TOTAL</span>
+                                <span className="score-value">{score}</span>
+                            </div>
+                            <div className="gameover-buttons">
+                                <button className="gameover-btn" onClick={handleRestart}>
+                                    REINTENTAR
+                                </button>
+                                <button className="gameover-btn-secondary" onClick={() => navigate('/')}>
+                                    MENÚ PRINCIPAL
+                                </button>
+                            </div>
                         </div>
                     </div>
                 )}
 
-                {/* UI Overlay */}
-                <div className="crosshair">+</div>
-
-                {/* Interaction Prompt (Lower middle) */}
-                {interactionMsg && (
-                    <div className="interaction-prompt">
-                        {interactionMsg}
-                    </div>
+                {!gameOver && (
+                    <>
+                        {/* HUD */}
+                        <div className="hud-top">
+                            <div className="hud-clock">{formatTime(time)}</div>
+                            <div className="hud-anomalies">
+                                <span className="hud-dot" /> {activeAnomalies.length} ACTIV{activeAnomalies.length !== 1 ? 'AS' : 'A'}
+                            </div>
+                        </div>
+                        <div className="hud-bottom">
+                            <div className="hud-tasks">
+                                <span className={`task-indicator ${lightsOn ? 'done' : ''}`}>💡</span>
+                                <span className={`task-indicator ${phoneAnswered ? 'done' : ''}`}>📞</span>
+                                <span className={`task-indicator ${bathroomClean ? 'done' : ''}`}>🧹</span>
+                                <span className={`task-indicator ${registerOn ? 'done' : ''}`}>💳</span>
+                            </div>
+                            <div className="hud-progress">
+                                <div className="hud-progress-bar">
+                                    <div className="hud-progress-fill" style={{ width: `${(time / SHIFT_END) * 100}%` }} />
+                                </div>
+                                <span className="hud-progress-label">{Math.floor((time / SHIFT_END) * 100)}%</span>
+                            </div>
+                        </div>
+                        <div className="crosshair">+</div>
+                        {anomalyAlert && (
+                            <div className="anomaly-alert">{anomalyAlert}</div>
+                        )}
+                        {interactionMsg && (
+                            <div className="interaction-prompt">{interactionMsg}</div>
+                        )}
+                        {bossMessage && (
+                            <div className="boss-subtitle">[JEFE]: "{bossMessage}"</div>
+                        )}
+                    </>
                 )}
 
-                {/* Boss Phone Transcript (Top middle) */}
-                {bossMessage && (
-                    <div className="boss-subtitle">
-                        [JEFE]: "{bossMessage}"
-                    </div>
-                )}
-
-                {/* 3D Canvas */}
-                <Canvas shadows camera={{ fov: 75, position: [0, 3, 19] }}>
-                    <SoftShadows size={25} samples={10} focus={0.5} />
-
+                <Canvas shadows={{ enabled: true, type: 'pcfsoft' }} camera={{ fov: 75, position: [0, 3, 19], near: 0.1, far: 100 }}>
+                    <SoftShadows size={25} samples={16} focus={0.5} />
                     <color attach="background" args={['#020308']} />
-                    <fog attach="fog" args={['#020308', 15, 60]} />
-
+                    <fog attach="fog" args={['#020308', 10, 50]} />
                     <Sky distance={450000} sunPosition={[0, -1, 0]} inclination={0} azimuth={0.25} />
                     <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
-
-                    <ambientLight intensity={0.4} color="#4466ff" />
-
-                    {/* Luz de emergencia tenue cerca del interruptor */}
-                    <pointLight position={[-2, 2.5, 13]} intensity={0.5} color="#ffffff" distance={8} castShadow shadow-mapSize={[1024, 1024]} />
-
-                    {/* Luces principales (Grid de 6 luces) */}
+                    <Suspense fallback={null}>
+                        <Environment preset="night" />
+                    </Suspense>
+                    <ambientLight intensity={0.2} color="#2233aa" />
+                    <pointLight position={[-2, 2.5, 13]} intensity={0.8} color="#ff8844" distance={10} decay={1.5} castShadow shadow-mapSize={[2048, 2048]} />
                     {lightsOn && (
                         <group name="CeilingLights">
-                            <pointLight position={[-6, 4.5, 5]} intensity={5} color="#ffffff" distance={25} decay={2} castShadow shadow-mapSize={[1024, 1024]} />
-                            <pointLight position={[6, 4.5, 5]} intensity={5} color="#ffffff" distance={25} decay={2} castShadow shadow-mapSize={[1024, 1024]} />
-                            <pointLight position={[-6, 4.5, -5]} intensity={5} color="#ffffff" distance={25} decay={2} castShadow shadow-mapSize={[1024, 1024]} />
-                            <pointLight position={[6, 4.5, -5]} intensity={5} color="#ffffff" distance={25} decay={2} castShadow shadow-mapSize={[1024, 1024]} />
-                            <pointLight position={[-6, 4.5, -15]} intensity={5} color="#ffffff" distance={25} decay={2} castShadow shadow-mapSize={[1024, 1024]} />
-                            <pointLight position={[6, 4.5, -15]} intensity={5} color="#ffffff" distance={25} decay={2} castShadow shadow-mapSize={[1024, 1024]} />
+                            <pointLight position={[-6, 4.5, 5]} intensity={8} color="#ffeedd" distance={30} decay={1.5} castShadow shadow-mapSize={[2048, 2048]} shadow-bias={-0.001} />
+                            <pointLight position={[6, 4.5, 5]} intensity={8} color="#ffeedd" distance={30} decay={1.5} castShadow shadow-mapSize={[2048, 2048]} shadow-bias={-0.001} />
+                            <pointLight position={[-6, 4.5, -5]} intensity={8} color="#ffeedd" distance={30} decay={1.5} castShadow shadow-mapSize={[2048, 2048]} shadow-bias={-0.001} />
+                            <pointLight position={[6, 4.5, -5]} intensity={8} color="#ffeedd" distance={30} decay={1.5} castShadow shadow-mapSize={[2048, 2048]} shadow-bias={-0.001} />
+                            <pointLight position={[-6, 4.5, -15]} intensity={8} color="#ffeedd" distance={30} decay={1.5} castShadow shadow-mapSize={[2048, 2048]} shadow-bias={-0.001} />
+                            <pointLight position={[6, 4.5, -15]} intensity={8} color="#ffeedd" distance={30} decay={1.5} castShadow shadow-mapSize={[2048, 2048]} shadow-bias={-0.001} />
                         </group>
                     )}
-
-                    {/* Luces del Almacen y Baño */}
-                    {lightsOn && <pointLight position={[-8, 4, -18]} intensity={1.5} color="#e0f7ff" castShadow distance={15} decay={2} shadow-mapSize={[512, 512]} />}
-                    {lightsOn && <pointLight position={[8, 4, -18]} intensity={1.5} color="#e0f7ff" castShadow distance={15} decay={2} shadow-mapSize={[512, 512]} />}
-
+                    {lightsOn && <pointLight position={[-8, 4, -18]} intensity={3} color="#e0f7ff" castShadow distance={20} decay={1.5} shadow-mapSize={[1024, 1024]} />}
+                    {lightsOn && <pointLight position={[8, 4, -18]} intensity={3} color="#e0f7ff" castShadow distance={20} decay={1.5} shadow-mapSize={[1024, 1024]} />}
                     {active && <PointerLockControls />}
-
                     <Suspense fallback={null}>
                         <Physics gravity={[0, -20, 0]}>
                             <Player setBossMessage={setBossMessage} active={active} />
@@ -164,14 +261,16 @@ const Game = () => {
                             <Store />
                         </Physics>
                     </Suspense>
-
-                    <EffectComposer disableNormalPass>
-                        <Bloom luminanceThreshold={1} intensity={1.5} levels={8} mipmapBlur />
-                        <Vignette eskil={false} offset={0.1} darkness={1.1} />
-                        <Noise opacity={0.06} />
-                        <BrightnessContrast brightness={0.05} contrast={0.1} />
+                    <EffectComposer multisampling={4}>
+                        <SMAA />
+                        <SSAO intensity={20} radius={0.5} screenspaceRadius={0.3} ambientOcclusionOnly={false} />
+                        <Bloom luminanceThreshold={0.8} intensity={1.8} levels={8} mipmapBlur />
+                        <ChromaticAberration offset={[0.002, 0.001]} />
+                        <ToneMapping mode={3} />
+                        <Vignette eskil={false} offset={0.05} darkness={1.4} />
+                        <Noise opacity={0.04} />
+                        <BrightnessContrast brightness={-0.02} contrast={0.15} />
                     </EffectComposer>
-
                 </Canvas>
             </div>
         </GameContext.Provider>
