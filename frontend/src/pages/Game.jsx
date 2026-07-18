@@ -263,15 +263,6 @@ const Game = () => {
                             <Store />
                         </Physics>
                     </Suspense>
-                    <EffectComposer>
-                        <SMAA />
-                        <Bloom luminanceThreshold={0.8} intensity={1.8} levels={8} mipmapBlur />
-                        <ChromaticAberration offset={[0.002, 0.001]} />
-                        <ToneMapping mode={3} />
-                        <Vignette eskil={false} offset={0.05} darkness={1.4} />
-                        <Noise opacity={0.04} />
-                        <BrightnessContrast brightness={-0.02} contrast={0.15} />
-                    </EffectComposer>
                 </Canvas>
             </div>
         </GameContext.Provider>
