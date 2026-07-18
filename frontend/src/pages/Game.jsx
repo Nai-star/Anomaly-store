@@ -232,7 +232,7 @@ const Game = () => {
                     </>
                 )}
 
-                <Canvas gl={{ powerPreference: "high-performance", antialias: false, alpha: false }} shadows={{ enabled: true, type: 'pcfsoft' }} camera={{ fov: 75, position: [0, 3, 19], near: 0.1, far: 100 }}>
+                <Canvas shadows={{ enabled: true, type: 'pcfsoft' }} camera={{ fov: 75, position: [0, 3, 19], near: 0.1, far: 100 }}>
                     <SoftShadows size={25} samples={10} focus={0.5} />
                     <color attach="background" args={['#020308']} />
                     <fog attach="fog" args={['#020308', 10, 50]} />
