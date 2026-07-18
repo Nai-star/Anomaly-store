@@ -8,7 +8,7 @@ import { playSFX } from '../../utils/audio';
 const Forest = () => {
     const trees = useMemo(() => {
         const temp = [];
-        for (let i = 0; i < 250; i++) {
+        for (let i = 0; i < 100; i++) {
             const radius = 25 + Math.random() * 70;
             const angle = Math.random() * Math.PI * 2;
             const x = Math.cos(angle) * radius;

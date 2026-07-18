@@ -85,7 +85,7 @@ const Game = () => {
                 }
                 return nextTime;
             });
-        }, 2000);
+        }, 5000);
         return () => clearInterval(timer);
     }, []);
 
@@ -242,15 +242,15 @@ const Game = () => {
                     </Suspense>
                     <ambientLight intensity={0.45} color="#3344cc" />
                     <directionalLight position={[10, 20, 10]} intensity={0.25} color="#88aaff" />
-                    <pointLight position={[-2, 2.5, 13]} intensity={0.8} color="#ff8844" distance={15} decay={1.5} castShadow shadow-mapSize={[1024, 1024]} />
+                    <pointLight position={[-2, 2.5, 13]} intensity={0.8} color="#ff8844" distance={15} decay={1.5} castShadow shadow-mapSize={[512, 512]} />
                     {lightsOn && (
                         <group name="CeilingLights">
-                            <pointLight position={[-6, 4.5, 5]} intensity={8} color="#ffeedd" distance={30} decay={1.5} castShadow shadow-mapSize={[2048, 2048]} shadow-bias={-0.001} />
-                            <pointLight position={[6, 4.5, 5]} intensity={8} color="#ffeedd" distance={30} decay={1.5} castShadow shadow-mapSize={[2048, 2048]} shadow-bias={-0.001} />
-                            <pointLight position={[-6, 4.5, -5]} intensity={8} color="#ffeedd" distance={30} decay={1.5} castShadow shadow-mapSize={[2048, 2048]} shadow-bias={-0.001} />
-                            <pointLight position={[6, 4.5, -5]} intensity={8} color="#ffeedd" distance={30} decay={1.5} castShadow shadow-mapSize={[2048, 2048]} shadow-bias={-0.001} />
-                            <pointLight position={[-6, 4.5, -15]} intensity={8} color="#ffeedd" distance={30} decay={1.5} castShadow shadow-mapSize={[2048, 2048]} shadow-bias={-0.001} />
-                            <pointLight position={[6, 4.5, -15]} intensity={8} color="#ffeedd" distance={30} decay={1.5} castShadow shadow-mapSize={[2048, 2048]} shadow-bias={-0.001} />
+                            <pointLight position={[-6, 4.5, 5]} intensity={8} color="#ffeedd" distance={30} decay={1.5} castShadow shadow-mapSize={[512, 512]} shadow-bias={-0.001} />
+                            <pointLight position={[6, 4.5, 5]} intensity={8} color="#ffeedd" distance={30} decay={1.5} castShadow shadow-mapSize={[512, 512]} shadow-bias={-0.001} />
+                            <pointLight position={[-6, 4.5, -5]} intensity={8} color="#ffeedd" distance={30} decay={1.5} castShadow shadow-mapSize={[512, 512]} shadow-bias={-0.001} />
+                            <pointLight position={[6, 4.5, -5]} intensity={8} color="#ffeedd" distance={30} decay={1.5} castShadow shadow-mapSize={[512, 512]} shadow-bias={-0.001} />
+                            <pointLight position={[-6, 4.5, -15]} intensity={8} color="#ffeedd" distance={30} decay={1.5} castShadow shadow-mapSize={[512, 512]} shadow-bias={-0.001} />
+                            <pointLight position={[6, 4.5, -15]} intensity={8} color="#ffeedd" distance={30} decay={1.5} castShadow shadow-mapSize={[512, 512]} shadow-bias={-0.001} />
                         </group>
                     )}
                     {lightsOn && <pointLight position={[-8, 4, -18]} intensity={3} color="#e0f7ff" castShadow distance={20} decay={1.5} shadow-mapSize={[1024, 1024]} />}
