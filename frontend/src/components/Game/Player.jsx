@@ -122,6 +122,8 @@ const Player = ({ setBossMessage, active }) => {
 
         // Anomalías (solo adentros)
         if (isInside && activeAnomalies.includes('floating_mannequin') && pos.distanceTo(new THREE.Vector3(0, 3, 0)) < 4 && 4 < currentMin) closest = 'floating_mannequin';
+        if (isInside && activeAnomalies.includes('rotating_mannequin') && pos.distanceTo(new THREE.Vector3(5, 0, 6)) < 4 && 4 < currentMin) closest = 'rotating_mannequin';
+        if (isInside && activeAnomalies.includes('fallen_clothes') && pos.distanceTo(new THREE.Vector3(-4, 0, -2)) < 4 && 4 < currentMin) closest = 'fallen_clothes';
         if (isInside && activeAnomalies.includes('extra_box') && pos.distanceTo(new THREE.Vector3(0, 0.5, 5)) < 3 && 3 < currentMin) closest = 'extra_box';
         if (isInside && activeAnomalies.includes('moving_bag') && pos.distanceTo(new THREE.Vector3(0, 0.3, 8)) < 3 && 3 < currentMin) closest = 'moving_bag';
 
@@ -146,6 +148,12 @@ const Player = ({ setBossMessage, active }) => {
         } else if (closest === 'floating_mannequin') {
             message = 'Presiona [E] para REPORTAR MANIQUÍ';
             if (keys.current.e && canInteract) { reportAnomaly('floating_mannequin'); lastInteraction.current = now; }
+        } else if (closest === 'rotating_mannequin') {
+            message = 'Presiona [E] para REPORTAR MANIQUÍ EXTRAÑO';
+            if (keys.current.e && canInteract) { reportAnomaly('rotating_mannequin'); lastInteraction.current = now; }
+        } else if (closest === 'fallen_clothes') {
+            message = 'Presiona [E] para REPORTAR ROPA CAÍDA';
+            if (keys.current.e && canInteract) { reportAnomaly('fallen_clothes'); lastInteraction.current = now; }
         } else if (closest === 'extra_box') {
             message = 'Presiona [E] para REPORTAR OBJETO EXTRA';
             if (keys.current.e && canInteract) { reportAnomaly('extra_box'); lastInteraction.current = now; }

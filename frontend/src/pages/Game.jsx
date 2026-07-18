@@ -14,6 +14,8 @@ export const GameContext = createContext();
 const SHIFT_END = 360; // 6 AM
 const ANOMALIES = [
     { id: 'floating_mannequin', name: 'Maniquí Flotante', chance: 0.1 },
+    { id: 'rotating_mannequin', name: 'Maniquí Girando', chance: 0.1 },
+    { id: 'fallen_clothes', name: 'Ropa Caída', chance: 0.15 },
     { id: 'red_lights', name: 'Luces Rojas', chance: 0.15 },
     { id: 'moving_bag', name: 'Bolso Movido', chance: 0.2 },
     { id: 'extra_box', name: 'Caja Extra', chance: 0.2 },
