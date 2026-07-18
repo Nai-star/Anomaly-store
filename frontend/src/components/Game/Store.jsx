@@ -374,6 +374,9 @@ const Store = () => {
                     <sphereGeometry args={[0.08]} />
                     <meshStandardMaterial color={lightsOn ? "#00ff00" : "#ff0000"} emissive={lightsOn ? "#00ff00" : "#ff0000"} emissiveIntensity={10} />
                 </mesh>
+                {!lightsOn && (
+                    <pointLight position={[0, 0, 0.5]} intensity={2} color="#ff0000" distance={3} decay={2} />
+                )}
                 <Text position={[0, 0.6, 0.05]} fontSize={0.2} color="#fff">
                     INTERRUPTOR LUCES
                     <meshStandardMaterial emissive="#fff" emissiveIntensity={5} />

@@ -241,8 +241,8 @@ const Game = () => {
                     <Suspense fallback={null}>
                         <Environment preset="night" />
                     </Suspense>
-                    <ambientLight intensity={0.2} color="#2233aa" />
-                    <pointLight position={[-2, 2.5, 13]} intensity={0.8} color="#ff8844" distance={10} decay={1.5} castShadow shadow-mapSize={[2048, 2048]} />
+                    <ambientLight intensity={0.45} color="#3344cc" />
+                    <pointLight position={[-2, 2.5, 13]} intensity={0.8} color="#ff8844" distance={15} decay={1.5} castShadow shadow-mapSize={[1024, 1024]} />
                     {lightsOn && (
                         <group name="CeilingLights">
                             <pointLight position={[-6, 4.5, 5]} intensity={8} color="#ffeedd" distance={30} decay={1.5} castShadow shadow-mapSize={[2048, 2048]} shadow-bias={-0.001} />
@@ -265,7 +265,6 @@ const Game = () => {
                     </Suspense>
                     <EffectComposer>
                         <SMAA />
-                        <SSAO intensity={20} radius={0.5} screenspaceRadius={0.3} ambientOcclusionOnly={false} />
                         <Bloom luminanceThreshold={0.8} intensity={1.8} levels={8} mipmapBlur />
                         <ChromaticAberration offset={[0.002, 0.001]} />
                         <ToneMapping mode={3} />
