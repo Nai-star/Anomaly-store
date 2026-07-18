@@ -232,8 +232,8 @@ const Game = () => {
                     </>
                 )}
 
-                <Canvas shadows={{ enabled: true, type: 'pcfsoft' }} camera={{ fov: 75, position: [0, 3, 19], near: 0.1, far: 100 }}>
-                    <SoftShadows size={25} samples={16} focus={0.5} />
+                <Canvas gl={{ powerPreference: "high-performance", antialias: false, alpha: false }} shadows={{ enabled: true, type: 'pcfsoft' }} camera={{ fov: 75, position: [0, 3, 19], near: 0.1, far: 100 }}>
+                    <SoftShadows size={25} samples={10} focus={0.5} />
                     <color attach="background" args={['#020308']} />
                     <fog attach="fog" args={['#020308', 10, 50]} />
                     <Sky distance={450000} sunPosition={[0, -1, 0]} inclination={0} azimuth={0.25} />
@@ -263,7 +263,7 @@ const Game = () => {
                             <Store />
                         </Physics>
                     </Suspense>
-                    <EffectComposer multisampling={4}>
+                    <EffectComposer>
                         <SMAA />
                         <SSAO intensity={20} radius={0.5} screenspaceRadius={0.3} ambientOcclusionOnly={false} />
                         <Bloom luminanceThreshold={0.8} intensity={1.8} levels={8} mipmapBlur />
