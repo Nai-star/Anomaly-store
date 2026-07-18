@@ -101,12 +101,12 @@ const StreetLamp = ({ position, rotation }) => {
                 target={targetObj}
                 angle={0.45}
                 penumbra={0.8}
-                intensity={80} // Heavy intensity for sharp pools of light
+                intensity={120} // Heavy intensity for sharp pools of light
                 color="#ffc355"
                 castShadow
                 volumetric={false} // Volumetric is expensive, the high penumbra light does the job
-                distance={20}
-                decay={2}
+                distance={35}
+                decay={1.5}
             />
 
             {/* Lamp Collision Pole */}

@@ -234,14 +234,15 @@ const Game = () => {
 
                 <Canvas shadows={{ enabled: true, type: 'pcfsoft' }} camera={{ fov: 75, position: [0, 3, 19], near: 0.1, far: 100 }}>
                     <SoftShadows size={25} samples={10} focus={0.5} />
-                    <color attach="background" args={['#020308']} />
-                    <fog attach="fog" args={['#020308', 10, 50]} />
+                    <color attach="background" args={['#060814']} />
+                    <fog attach="fog" args={['#060814', 15, 60]} />
                     <Sky distance={450000} sunPosition={[0, -1, 0]} inclination={0} azimuth={0.25} />
                     <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
                     <Suspense fallback={null}>
                         <Environment preset="night" />
                     </Suspense>
                     <ambientLight intensity={0.45} color="#3344cc" />
+                    <directionalLight position={[10, 20, 10]} intensity={0.25} color="#88aaff" />
                     <pointLight position={[-2, 2.5, 13]} intensity={0.8} color="#ff8844" distance={15} decay={1.5} castShadow shadow-mapSize={[1024, 1024]} />
                     {lightsOn && (
                         <group name="CeilingLights">
